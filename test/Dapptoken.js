@@ -1,4 +1,4 @@
-const assert = require("assert");
+
 
 
 
@@ -81,6 +81,27 @@ it('transfer token ownership',function(){
         return tokenInstance.balanceOf(accounts[0])
     }).then(function(balance2){
         assert.equal(balance2,75000,'sender balance is right')
+    })
+})
+
+it('approve tokens for delegated transfer',function(){
+    return DappToken.deployed().then(function(instance){
+        tokenInstance=instance;
+        return tokenInstance.approve.call(accounts[1],100);
+    }).then(function(success){
+        assert.equal(success,true,'should return true')
+        return tokenInstance.approve(accounts[1],100)
+    }).then(function(reciept){
+        assert.equal(reciept.logs.length,1,'triggers one event');
+        assert.equal(reciept.logs[0].event,'Approval','should be the Trasnfer event');
+        assert.equal(reciept.logs[0].args._owner,accounts[0],'logs the account the tokens transfer from');
+        assert.equal(reciept.logs[0].args._spender,accounts[1],'logs the account tokens tranferred to');
+        assert.equal(reciept.logs[0].args._value,100,'transfer amount')
+
+        return tokenInstance.allowance(accounts[0],accounts[1])
+
+    }).then(function(allowance){
+        assert.equal(allowance,100,'stores the allowance for delegated transfer')
     })
 })
 
