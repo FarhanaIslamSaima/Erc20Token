@@ -4,13 +4,19 @@
 
 
 
+
+
 const DappTokenSale = artifacts.require("DappTokenSale");
+const DappToken=artifacts.require("DappToken");
 
 
 contract (DappTokenSale,function(accounts){
     var tokenSaleInstance;
+    var tokenSale;
+    var admin=accounts[0]
     var tokenPrice=1000000000000000;
     var numberOfToken=10;
+    var tokenAvailable=75000;
     var buyer=accounts[1];
   it('initialized contract with correct values',function(){
     return DappTokenSale.deployed().then(function(instance){
@@ -29,9 +35,16 @@ contract (DappTokenSale,function(accounts){
 
 
   it('facilities of token buying',function(){
-    return DappTokenSale.deployed().then(function(instance){
-        tokenSaleInstance=instance;
+    return DappToken.deployed().then(function(instance){
+        tokenInstance=instance;
+        return DappTokenSale.deployed().then(function(instance){
+            tokenSaleInstance=instance;
+            return tokenInstance.transfer(buyer,tokenAvailable,{from:admin})
+        }).then(function(){
+      
         return tokenSaleInstance.buyTokens(numberOfToken,{from:buyer,value:numberOfToken*tokenPrice})
+        
+       
     }).then(function(reciept){
       
         assert.equal(reciept.logs.length,1,'triggers one event');
@@ -44,9 +57,26 @@ contract (DappTokenSale,function(accounts){
 
     }).then(function(amount){
         assert.equal(amount,numberOfToken,'increaments the number of token')
-        return tokenSaleInstance.buyTokens(numberOfToken,{from:buyer,value:1})
+
+      return tokenInstance.balanceOf(buyer).then(function(balance){
+        assert.equal(balance.toNumber(),numberOfToken,'balance is correct')
+        return tokenInstance.balanceOf(tokenSaleInstance.address)})
+      })  
+       
+        .then(function(balance){
+            assert.equal(balance.toNumber(),tokenAvailable-numberOfToken,'number of token is correct')
+            return tokenSaleInstance.buyTokens(numberOfToken,{from:buyer,value:1})
+     
+     
+        
+    
     }).then(assert.fail).catch(function(error){
         assert(error.message.indexOf('revert')>=0,'token price is high than amount')
-    })
+        return tokenSaleInstance.buyTokens(80000,{from:buyer,value:numberOfToken*tokenPrice})
+    }).then(assert.fail).catch(function(error){
+        assert(error.message.indexOf('revert')>=0,'token price is high than amount')
   })
+
+})
+})
 })
