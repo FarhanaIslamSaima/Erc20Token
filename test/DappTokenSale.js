@@ -6,6 +6,8 @@
 
 
 
+
+
 const DappTokenSale = artifacts.require("DappTokenSale");
 const DappToken=artifacts.require("DappToken");
 
@@ -79,4 +81,34 @@ contract (DappTokenSale,function(accounts){
 
 })
 })
+
+
+
+
+it('ends a sale',function(){
+    return DappToken.deployed().then(function(instance){
+        tokenInstance=instance
+        return DappTokenSale.deployed().then(function(instance){
+            tokenSaleInstance=instance
+            return tokenSaleInstance.endSale({from:buyer})
+        }).then(assert.fail).catch(function(error){
+            assert(error.message.indexOf('revert')>=0,'must be admin to end sale')
+            return tokenSaleInstance.endSale({from:admin})
+        }).then(function(reciept){
+            return tokenInstance.balanceOf(admin)
+
+        }).then(function(balance){
+            assert.equal(balance.toNumber(),25000,'returns all remaining token')
+
+            
+        })
+
+    })
+})
+
+
+
+
+
+
 })
