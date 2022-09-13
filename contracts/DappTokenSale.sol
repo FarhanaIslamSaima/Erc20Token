@@ -36,7 +36,7 @@ contract DappTokenSale{
     function endSale() public {
         require(admin==msg.sender);
         require(tokenContract.transfer(admin, tokenContract.balanceOf(address(this))));
-        selfdestruct(msg.sender);
+ 
 
     }
 }
