@@ -5,12 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Web3Provider from 'react-web3-provider'
 import Web3 from 'web3'
+import TokenProvider from './context/TokenProvider';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-
+<TokenProvider>
 <App />
+
+</TokenProvider>
+
 
   </React.StrictMode>
 );
